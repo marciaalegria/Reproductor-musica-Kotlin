@@ -21,6 +21,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var currentSong:song
 
     private var currentSongIndex:Int = 0
+    private var isPlaying:Boolean= false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +37,8 @@ class MainActivity : AppCompatActivity() {
                 position= it.getInt(MEDIA_PLAYER_POSITION)
             }
         }
-
+        updateUisong()
+        binding.playPauseButton.setOnClickListener{playOrPauseMusic()}
 
     }
 
@@ -44,15 +46,23 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         Log.i(LOG_MAIN_ACTIVITY, "onStart()")
         mediaPlayer = MediaPlayer.create(this,currentSong.audioResId)
-        mediaPlayer?.start()
+        if(isPlaying)  mediaPlayer?.start()
+
+
 
     }
 
     override fun onResume() {
         super.onResume()
         Log.i(LOG_MAIN_ACTIVITY, "onResume()")
-        mediaPlayer?.seekTo(position)
-        mediaPlayer?.start()
+        if(isPlaying){
+            mediaPlayer?.seekTo(position)
+            mediaPlayer?.start()
+            isPlaying=!isPlaying
+
+        }
+
+
     }
 
     override fun onPause() {
@@ -61,6 +71,7 @@ class MainActivity : AppCompatActivity() {
         if (mediaPlayer != null)
             position = mediaPlayer!!.currentPosition
         mediaPlayer?.pause()
+        //isPlaying=false
     }
 
     override fun onStop() {
@@ -84,6 +95,18 @@ class MainActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt(MEDIA_PLAYER_POSITION, position)
+    }
+    private fun updateUisong(){
+        binding.titleTextView.text = currentSong.title
+        binding.albumCoverImageView.setImageResource(currentSong.imageResId)
+    }
+    private fun playOrPauseMusic(){
+        if(isPlaying){
+            mediaPlayer?.pause()
+        }else{
+            mediaPlayer?.start()
+        }
+        isPlaying = !isPlaying
     }
 
 }
