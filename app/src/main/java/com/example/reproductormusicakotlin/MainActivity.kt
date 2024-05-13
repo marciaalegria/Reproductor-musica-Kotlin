@@ -38,8 +38,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
         updateUisong()
+
         binding.playPauseButton.setOnClickListener{playOrPauseMusic()}
 
+        binding.playNextButton.setOnClickListener{playNextsong()}
+
+        binding.playPreviousButton.setOnClickListener{playPreviousSong()}
     }
 
     override fun onStart() {
@@ -55,11 +59,10 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         Log.i(LOG_MAIN_ACTIVITY, "onResume()")
+        mediaPlayer?.seekTo(position)
         if(isPlaying){
-            mediaPlayer?.seekTo(position)
             mediaPlayer?.start()
             isPlaying=!isPlaying
-
         }
 
 
@@ -99,6 +102,7 @@ class MainActivity : AppCompatActivity() {
     private fun updateUisong(){
         binding.titleTextView.text = currentSong.title
         binding.albumCoverImageView.setImageResource(currentSong.imageResId)
+        updatePlayPauseBottom()
     }
     private fun playOrPauseMusic(){
         if(isPlaying){
@@ -107,6 +111,34 @@ class MainActivity : AppCompatActivity() {
             mediaPlayer?.start()
         }
         isPlaying = !isPlaying
+        updatePlayPauseBottom()
+
+    }
+    private fun updatePlayPauseBottom(){
+        binding.playPauseButton.text = if(isPlaying)"pause" else "play"
+    }
+    private fun playNextsong(){
+        currentSongIndex = (currentSongIndex)+ 1 % AppConstans.songs.size
+        currentSong = AppConstans.songs[currentSongIndex]
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+        mediaPlayer = MediaPlayer.create(this, currentSong.audioResId)
+        mediaPlayer?.start()
+        isPlaying = true
+        updateUisong()
+    }
+    private fun playPreviousSong() {
+        // Algoritmo para obtener el indice y hacer una lista circular
+        //cancion anterior - tamaño lista de canciones pra que siempre sea positivo
+        //% devuelve un número positico si el dividendo es negativo
+        currentSongIndex = (currentSongIndex - 1 + AppConstans.songs.size) % AppConstans.songs.size
+        currentSong = AppConstans.songs[currentSongIndex]
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+        mediaPlayer = MediaPlayer.create(this, currentSong.audioResId)
+        mediaPlayer?.start()
+        isPlaying = true
+        updateUisong()
     }
 
 }
